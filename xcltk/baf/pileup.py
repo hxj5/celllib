@@ -237,6 +237,10 @@ def pileup(argv):
         sys.stderr.write("[I::%s] program configuration:\n" % func)
         conf.show(fp = sys.stderr, prefix = "\t")
 
+        conf.umi_dir = os.path.join(conf.out_dir, "umi")
+        if not os.path.exists(umi_dir):
+            os.mkdir(conf.umi_dir)
+
         # extract SNPs for each region
         if conf.debug > 0:
             sys.stderr.write("[D::%s] extract SNPs for each region.\n" % (func,))

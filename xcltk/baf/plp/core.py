@@ -64,7 +64,7 @@ def sp_region(reg, conf):
         reg_oth_cnt[smp] = len(reg_oth_umi[smp])
         reg_dp_cnt[smp]  = len(dp_umi)
     
-    return((0, reg_ref_cnt, reg_alt_cnt, reg_oth_cnt, reg_dp_cnt))
+    return((0, reg_ref_cnt, reg_alt_cnt, reg_oth_cnt, reg_dp_cnt, reg_ref_umi, reg_alt_umi, reg_oth_umi))
 
 # TODO: use clever IPC (Inter-process communication) instead of naive `raise Error`.
 # NOTE: 
@@ -100,7 +100,8 @@ def sp_count(thdata):
                               (func, thdata.idx, reg.name))
 
         if reg.snp_list:
-            ret, reg_ref_cnt, reg_alt_cnt, reg_oth_cnt, reg_dp_cnt = sp_region(reg, conf)
+            ret, reg_ref_cnt, reg_alt_cnt, reg_oth_cnt, reg_dp_cnt, \
+                 reg_ref_umi, reg_alt_umi, reg_oth_umi = sp_region(reg, conf)
             if ret < 0:
                 raise ValueError("[%s] errcode %d" % (func, -9))
 
@@ -118,6 +119,9 @@ def sp_count(thdata):
                         nu_share = reg_ref_cnt[smp] + reg_alt_cnt[smp] - reg_dp_cnt[smp]
                         nu_ad = reg_alt_cnt[smp] - nu_share
                         nu_dp = reg_dp_cnt[smp] - nu_share
+                        umi_share = reg_ref_umi[smp].intersection(reg_alt_umi[smp])
+                        reg_ref_umi[smp] = reg_ref_umi[smp].difference(umi_share)
+                        reg_alt_umi[smp] = reg_alt_umi[smp].difference(umi_share)
                     else:
                         nu_ad = reg_alt_cnt[smp]
                         nu_dp = reg_ref_cnt[smp] + reg_alt_cnt[smp]
@@ -146,6 +150,22 @@ def sp_count(thdata):
             elif conf.output_all_reg:
                 fp_reg.write("%s\t%d\t%d\t%s\n" % (reg.chrom, reg.start, reg.end - 1, reg.name))
                 k_reg += 1
+
+            if str_dp:
+                out_umi_fn = os.path.join(conf.umi_dir, "%s.tsv" % reg.name)
+                with open(out_umi_fn, "w") as fp_umi:
+                    for smp in conf.barcodes:
+                        if smp in reg_ref_umi:
+                            umi_set = reg_ref_umi[smp]
+                            if umi_set:
+                                for umi in umi_set:
+                                    fp_umi.write("%s\t%s\t%d\n" % (smp, umi, 0))
+                        if smp in reg_alt_umi:
+                            umi_set = reg_alt_umi[smp]
+                            if umi_set:
+                                for umi in umi_set:
+                                    fp_umi.write("%s\t%s\t%d\n" % (smp, umi, 1))
+
         elif conf.output_all_reg:
             fp_reg.write("%s\t%d\t%d\t%s\n" % (reg.chrom, reg.start, reg.end - 1, reg.name))
             k_reg += 1
