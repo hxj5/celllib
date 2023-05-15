@@ -1,6 +1,6 @@
 # Global configure
 
-PROGRAM = "xcltk"
-VERSION = "0.1.16"
+PROGRAM = "xcltk-plp-umi"
+VERSION = "0.1.16-plp-umi"
 DEBUG = 0
 

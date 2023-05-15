@@ -57,7 +57,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'xcltk = xcltk.xcltk:main'
+            'xcltk-plp-umi = xcltk.xcltk:main'
         ],
     }, 
 
