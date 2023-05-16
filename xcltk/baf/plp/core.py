@@ -90,6 +90,9 @@ def sp_count(thdata):
     fp_dp = zopen(thdata.out_dp_fn, "wt", ZF_F_GZIP, is_bytes = False)
     fp_oth = zopen(thdata.out_oth_fn, "wt", ZF_F_GZIP, is_bytes = False)
 
+    out_umi_fn = os.path.join(conf.umi_dir, "gene_umi_%d.tsv" % thdata.idx)
+    fp_umi = open(out_umi_fn, "w")
+
     m_reg = float(len(reg_list))
     n_reg = 0
     l_reg = 0
@@ -152,19 +155,17 @@ def sp_count(thdata):
                 k_reg += 1
 
             if str_dp:
-                out_umi_fn = os.path.join(conf.umi_dir, "%s.tsv" % reg.name)
-                with open(out_umi_fn, "w") as fp_umi:
-                    for smp in conf.barcodes:
-                        if smp in reg_ref_umi:
-                            umi_set = reg_ref_umi[smp]
-                            if umi_set:
-                                for umi in umi_set:
-                                    fp_umi.write("%s\t%s\t%d\n" % (smp, umi, 0))
-                        if smp in reg_alt_umi:
-                            umi_set = reg_alt_umi[smp]
-                            if umi_set:
-                                for umi in umi_set:
-                                    fp_umi.write("%s\t%s\t%d\n" % (smp, umi, 1))
+                for smp in conf.barcodes:
+                    if smp in reg_ref_umi:
+                        umi_set = reg_ref_umi[smp]
+                        if umi_set:
+                            for umi in umi_set:
+                                fp_umi.write("%s\t%s\t%s\t%d\n" % (smp, reg.name, umi, 0))
+                    if smp in reg_alt_umi:
+                        umi_set = reg_alt_umi[smp]
+                        if umi_set:
+                            for umi in umi_set:
+                                fp_umi.write("%s\t%s\t%s\t%d\n" % (smp, reg.name, umi, 1))
 
         elif conf.output_all_reg:
             fp_reg.write("%s\t%d\t%d\t%s\n" % (reg.chrom, reg.start, reg.end - 1, reg.name))
@@ -183,6 +184,9 @@ def sp_count(thdata):
     fp_ad.close()
     fp_dp.close()
     fp_oth.close()
+
+    fp_umi.close()
+
     conf.sam.close()
 
     thdata.conf = None    # sam object cannot be pickled.
