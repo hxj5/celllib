@@ -238,7 +238,7 @@ def pileup(argv):
         conf.show(fp = sys.stderr, prefix = "\t")
 
         conf.umi_dir = os.path.join(conf.out_dir, "umi")
-        if not os.path.exists(umi_dir):
+        if not os.path.exists(conf.umi_dir):
             os.mkdir(conf.umi_dir)
 
         # extract SNPs for each region
